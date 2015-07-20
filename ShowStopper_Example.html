@@ -1,0 +1,193 @@
+<html>
+<head>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" ></script>
+
+<script src="jquery-draggable-min.js" ></script>
+<!--     
+  Reference the theme's stylesheet on the Google CDN
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/start/jquery-ui.css" type="text/css" rel="Stylesheet" />
+
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js"></script>
+ -->
+    
+<script>
+
+    var arrActors = {};
+    var currActiveId;
+    
+    $(document).ready(function(){
+        
+        makeControls();
+        makeEvents();
+                
+        
+                
+    });
+    
+    function transform() {
+        
+        var scaleFactor = parseFloat($("#enterScale").val());
+        var rotateAngle = parseFloat($("#enterRotate").val());
+        
+        var cssObj =  {
+            "transform" : "scaleX(" + scaleFactor + ") scaleY(" + scaleFactor + ") rotate(" + rotateAngle + "deg)"           
+        };
+        
+        $("#"+currActiveId).css(cssObj); 
+      
+    }
+
+    
+    function makeControls() {
+        
+        var c = [];
+        
+        c.push("<div>");
+        c.push("<input type='button' id='addCharSet' value='Add'/>");
+                
+        c.push("</div><div>");
+        
+        c.push("Scale:<input id='enterScale' value='2.0'/>");
+
+        c.push("Rotate<input id='enterRotate' value='0'/>");
+        c.push("<input type='button' id='setTransform' value='Set Transform'/>");
+        
+        c.push("</div>");
+        
+        $("#control").html(c.join(''));
+        
+        
+    }
+    
+    function makeEvents() { 
+        
+        $("#addCharSet").on("click", function() {
+            var c = [];
+            
+            var rawNums = prompt("Enter character numbers separated by spaces");
+            
+            if(rawNums) {
+                
+                var arrNums = rawNums.split(' ');
+                var charStr = "";
+                
+                for(var i = 0; i < arrNums.length; i++) {
+                 
+                    charStr = charStr +  "&#x" + arrNums[i];
+                    
+                }
+                
+                var actor = {};
+                actor.chars = charStr;
+                var id = "actor_" + Math.floor(Math.random() * 10000);
+                setCurrentId(id);
+                arrActors[id] = {};
+                arrActors[id].chars = charStr;
+                c.push("<span class='actors active' id='" + id + "'>" + charStr + "</span>");      
+                $("#content").append(c.join('')); 
+                
+                $( "#" + id ).draggable();
+                
+            }
+        });
+        
+        $("#setTransform").on("click", function() {
+            transform();
+        });   
+        
+        $("#content").on("click", function(e) {
+     
+            var clickedId = $(e.target).attr("id");
+
+            if(clickedId == "content") {                     
+                setCurrentId();                
+            } else {
+                setCurrentId(clickedId);   
+            }
+        });
+  
+        
+    }
+    
+    function setCurrentId(id) {
+        
+        currActiveId = id;
+        $(".actors").removeClass("active");
+        $("#" + id).addClass("active");
+        
+        
+        
+    }
+    
+    
+    
+
+    
+    
+    
+    
+    
+</script>
+
+<style>
+
+    .actors {
+        
+        position: absolute;  
+        cursor: pointer;
+    }
+    
+    #content {
+        height: 80%;
+    }
+    
+    #control {
+        
+        height: 20%;
+    }
+    
+    .active {
+     
+        background: rgba(140, 25, 25, .5);
+        
+    }
+    
+    
+    
+       /*     
+        $("#content").on("click", function(e) {
+     
+            var clickedId = $(e.target).attr("id");
+console.log(clickedId);
+            if(clickedId == "content") {       
+                var x = e.pageX;
+                var xOffset = $(this).offset().left;
+                var y = e.pageY;
+                var yOffset = $(this).offset().top;
+                
+    //alert(x + ' , ' + y + ' , ' + xOffset  + ' , ' + yOffset);
+    //console.log( currActiveId, $("#"+currActiveId).html());           
+                $("#"+currActiveId).css("left", x); 
+                $("#"+currActiveId).css("top", y); 
+                
+                setCurrentId();
+                
+            } else {
+                setCurrentId(clickedId);   
+            }
+        });
+     */ 
+
+</style>
+
+</head>
+<body>
+
+
+<div id="control"></div>
+<div id="content"></div>
+
+
+</body>
+</html>
