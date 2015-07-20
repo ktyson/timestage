@@ -1,0 +1,99 @@
+<html>
+<head>
+<meta charset="UTF-8">
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+<script src="piece.js" type="text/javascript"></script>
+
+<script>
+
+
+//globals
+var currMSec = 0; 
+var scriptCheckInterval = 1000; //milliseconds
+var timer;
+
+//how far away is the camera
+var distanceFromCamera = 60;
+//how many pixels in a meter (arbitrary)
+var pixelsPerMeter = 2000;
+
+
+
+
+$(document).ready(function(){
+	
+	$.each(pieceMakers, function(idx,pieceMaker){
+	
+		pieces[pieceMaker.name] = new Piece(pieceMaker);	
+	
+	});
+
+	//initialize divs
+	for (var name in pieces){
+		pieces[name].makeInitial();		
+	};
+	
+	//start animation
+	$("#btn").live("click", function(){
+		timer = setInterval("checkScript()",scriptCheckInterval);
+	});
+	
+});
+
+
+
+
+
+function checkScript(){
+console.log(currMSec);
+	currMSec = currMSec + scriptCheckInterval;
+	
+	if(scripts.length){
+		$.each(scripts, function(idx, script){
+			if(script){
+				if(script.start < currMSec){
+					//perform animation action
+					pieces[script.name].move(script);
+					
+					//make label
+					var msg = "<div>"+(script.desc || '')+"</div>";
+					$("#desc").prepend(msg);
+					
+					//delete the script item					
+					scripts.splice(idx,1);						
+				}
+			}
+		});
+	}else{
+		var msg = "<div>Fini</div>";
+		$("#desc").prepend(msg);
+		clearInterval(timer); 
+	}
+
+}
+
+
+
+</script>
+
+<style>
+#desc{
+height: 20px;
+width:100%;
+overflow-y:scroll;
+border:solid thin blue;
+
+}
+
+</style>
+
+</head>
+<body>
+<input type="button" id="btn" value="GO"></input>
+<div id="desc"></div>
+
+
+
+</body>
+</html>

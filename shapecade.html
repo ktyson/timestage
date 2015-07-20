@@ -1,0 +1,170 @@
+<html>
+<head>
+<meta charset="UTF-8">
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+
+<script src="testscript1.js" type="text/javascript"></script>
+
+<script>
+
+
+
+//globals
+var currMSec = 0; 
+var scriptCheckInterval = 1000; //milliseconds
+var timer;
+
+$(document).ready(function(){
+
+	//initialize divs
+	for (var name in pieces){
+		makeBox(name);		
+	};
+	
+	//start animation
+	$("#btn").live("click", function(){
+		timer = setInterval("checkScript()",scriptCheckInterval);
+	});
+	
+});
+
+
+
+
+function makeBox(name){
+
+	var c = [];
+	
+	c.push("<div class='box' id='box_"+ name +"'>");
+	if(pieces[name].img){
+		c.push("<img style='height:100%' src='" + pieces[name].img + "'/>");
+	}
+	c.push("</div>");
+	$("body").append(c.join(''));
+	var myCss ={
+		"top": translateScreen(pieces[name].iTop, "top") +"px",
+		"left": translateScreen(pieces[name].iLeft, "left") +"px",
+		"width": translateDimension(pieces[name].width, pieces[name].iDistToCam)+"px",
+		"height": translateDimension(pieces[name].height, pieces[name].iDistToCam)+"px",
+		"background-color":pieces[name].color,
+		"z-index":pieces[name].zLevel
+	}
+	$("#box_"+ name).css(myCss);
+}
+
+
+function checkScript(){
+
+	currMSec = currMSec + scriptCheckInterval;
+	
+	if(script.length){
+		$.each(script, function(idx, action){
+			if(action){
+				if(action.mSec < currMSec){
+					//perform animation action
+					var send = action;
+					doAction(idx, send);
+					//delete the script item
+					script.splice(idx,1);						
+				}
+			}
+		});
+	}else{
+		//alert("Script done");
+		clearInterval(timer); 
+	}
+
+}
+
+
+function translateScreen(actualDim, direction){
+
+	var result = 0;
+	var pixels_per_meter = 60 * 100;
+	var reduction_to_screen = 0.1;
+	
+	var pixelRate = pixels_per_meter * reduction_to_screen;
+	
+	var addLeft = parseInt($(window).width()/3);
+	var addTop = parseInt($(window).height()/3);
+	var addBit = (direction == "left" ? addLeft : addTop);
+	
+	result = actualDim * pixelRate + addBit;
+console.log("pos",actualDim, pixelRate, addBit, result);
+	return result;
+
+}
+
+function translateDimension(actualDim, distanceFromCam){
+
+	var result = 0;
+	var pixels_per_meter = 60 * 100;
+	var reduction_to_screen = 0.1;
+	
+	var pixelRate = pixels_per_meter * reduction_to_screen;
+	
+	result = parseInt(actualDim * (1 / distanceFromCam) * pixelRate);
+
+console.log("size",actualDim, distanceFromCam, pixelRate, result);
+	return result;
+
+}
+
+function doAction(idx,action){
+
+	$.each(action.pieces,function(idx,piece){
+			
+		var myBox = $("#box_"+piece.name);
+
+		var myTop = piece.dTop[0] + "=" + translateScreen(piece.dTop[1], "top");
+		var myLeft = piece.dLeft[0] + "=" + translateScreen(piece.dLeft[1], "left");
+console.log(myTop, myLeft);	
+		var myHeight = translateDimension(pieces[piece.name].height, piece.dCamDist);
+		var myWidth = translateDimension(pieces[piece.name].width, piece.dCamDist);
+		
+		
+		var myAnim = {
+			"top": myTop,
+			"left": myLeft,
+			"height": myHeight,
+			"width": myWidth
+		};
+		
+		$(myBox).animate(myAnim, piece.dTime);
+		$("#desc").html(piece.desc);
+
+	});
+
+}
+
+
+
+
+
+
+
+
+
+</script>
+
+
+<style>
+.box{
+	position:absolute;
+	xxborder:solid thin black;
+}
+
+
+
+</style>
+
+</head>
+<body>
+<input type="button" id="btn" value="GO"></input>
+<span id="desc"></span>
+
+
+
+</body>
+</html>
