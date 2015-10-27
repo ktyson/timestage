@@ -1,0 +1,54 @@
+<html>
+<head>
+
+
+
+
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+<script>
+$(document).ready(function() {
+	
+	var drag = false;
+	$("#nub1").on("mousedown", function(){
+		drag = true;
+		console.log("mdn");
+	});
+	$(window).on("mouseup", function(){
+		drag = false;
+		console.log("mup");
+	});
+	$(window).on("mousemove", function(e){
+		if(drag) {
+			console.log(e.pageX);
+			$("#nub1").css("left",e.pageX);
+			//$('#display').html(e.pageX);
+			if(e.pageX > 0 && e.pageX > 100){
+				$("#nub1").html("&spades;");
+			}
+			if(e.pageX > 100 && e.pageX > 200){
+				$("#nub1").html("&hearts;");
+			}
+			if(e.pageX > 200 && e.pageX > 300){
+				$("#nub1").html("&clubs;");
+			}
+			if(e.pageX > 300 && e.pageX > 400){
+				$("#nub1").html("&diamond;");
+			}
+		}
+	});
+});
+</script>
+
+
+
+</head>
+<body>
+
+<!--<div id='display'>0</div>-->
+<div id='cont1'  style='position:relative; top: 180px; left:0px; height:50px; width:100%; border:solid green;'>
+	<div id='nub1' style='position:absolute; color:green; font-size:32pt; cursor:pointer; -webkit-transform: rotate(-90deg);'>&spades;</div>
+</div>
+
+</body>
+</html>
