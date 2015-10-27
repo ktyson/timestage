@@ -1,0 +1,22 @@
+{
+  "name": "TimeStage",
+  "version": "0.0.1",
+  "description": "all the worlds a stage",
+  "main": "serveTimeStage.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": "0.10.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:ktyson/timestage.git"
+  },
+  "author": "kdtyson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ktyson/timestage/issues"
+  },
+  "homepage": "https://github.com/ktyson/timestage"
+}

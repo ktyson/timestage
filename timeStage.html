@@ -1,0 +1,503 @@
+<!doctype html>
+<html>
+<head>
+
+<script src="jquery.1.10.2.min.js" ></script>
+<script src="jquery-draggable-min.js" ></script>
+<script src="piece.js" type="text/javascript"></script>
+    
+<script>
+
+//globals
+var currMSec = 0; 
+var scriptCheckInterval = 1000; //milliseconds
+var timer;
+
+//how far away is the camera
+var distanceFromCamera = 60;
+//how many pixels in a meter (arbitrary)
+var pixelsPerMeter = 2000;
+
+var play = {};
+var pieceMakers = [];
+var pieces = {};
+var scriptMoves=[]; 
+var copyScriptMoves=[];
+    
+    
+    
+pieceMakers = [
+    {
+      "xMeters": 0,
+      "yMeters": 2,
+      "wMeters": 0.73,
+      "hMeters": 2,
+      "name": "knight",
+      "img": "knight.gif"
+    },
+    {
+      "xMeters": 3,
+      "yMeters": 6,
+      "wMeters": 6,
+      "hMeters": 3,
+      "name": "trees",
+      "img": "tree.gif"
+    }
+  ];
+    
+    
+scriptMoves=[
+    {
+      "name": "knight",
+      "desc": "I walk across bridge",
+      "start": 1000,
+      "left": -6,
+      "top": 2,
+      "cam": -20
+    },
+    {
+      "name": "knight",
+      "desc": "I walk to front",
+      "start": 3000,
+      "left": 2,
+      "top": -0.5,
+      "cam": -20
+    },
+    {
+      "name": "all",
+      "desc": "The camera moves back",
+      "start": 5000,
+      "left": 0,
+      "top": 0,
+      "cam": 10
+    }
+  ];
+  
+
+    
+$(document).ready(function() {
+
+    makePlay();
+    
+    setBackground();
+	
+	//start animation
+	$("#go").on("click", function(){
+		timer = setInterval("checkScript()",scriptCheckInterval);
+	});
+	$("#reset").on("click", function(){
+		$("#stage").html("");
+        makePlay();
+        preparePieces();
+	});    
+
+    $(".tabs-menu a").click(function(event) {
+        event.preventDefault();
+        $(this).parent().addClass("current");
+        $(this).parent().siblings().removeClass("current");
+        var tab = $(this).attr("href");
+        $(".tab-content").not(tab).css("display", "none");
+        $(tab).fadeIn();
+        
+        if($(this).text() == "Stage") {
+            preparePieces();
+        }
+        
+    });
+    
+    $("#addPiece").on("click", function() {
+        ConvertFormToJSON("inputPiece", 1);
+    });
+    $("#addScript").on("click", function() {
+        ConvertFormToJSON("inputScript", 1);
+    });    
+    $("#showPiece").on("click", function() {
+        ConvertFormToJSON("inputPiece", 0);
+    });
+    $("#showScript").on("click", function() {
+        ConvertFormToJSON("inputScript", 0);
+    });
+    
+    $("#inOut").hide(); //init as hidden
+
+    $("#getJson").on("click", function(){        
+        $("#help").hide();
+        $("#inOut").show();
+        getSerial();           
+    });
+
+    $("#setJson").on("click", function(){
+        $("#help").hide();
+        $("#inOut").show();  
+        
+    });
+
+    $("#done").on("click", function(){           
+        setSerial();
+        $("#inOut").hide();           
+    });
+
+    $("#help").hide(); //init as hidden
+
+    $("#getHelp").on("click", function() {
+        $("#inOut").hide();
+        $("#help").show();
+    });
+
+    $("#doneHelp").on("click", function(){
+        $("#help").hide();        
+    });
+    
+    
+});
+ 
+function writePlay(incoming) {
+    play = {};
+    play = JSON.parse(incoming);
+    pieceMakers = play.pieceMakers;
+    scriptMoves = play.scriptMoves;
+}
+    
+function makePlay() {
+    play = {};
+    play.pieceMakers = {};
+    play.scriptMoves = {};
+    play.pieceMakers = pieceMakers;
+    play.scriptMoves = scriptMoves;   
+}
+    
+function setBackground() {
+    
+    var wBkgrd = "870px";
+    var hBkgrd = "500px";
+    var imgBkgrd = "images/bodian20castle20front.jpg";
+    $("#stage").css("background", "url(" + imgBkgrd + ") no-repeat");
+    $("#stage").css("background-size", "100%");  
+    $("#stage").css("width", wBkgrd);
+    $("#stage").css("height", hBkgrd);
+
+        
+}
+    
+function preparePieces() {
+    currMSec = 0;
+    $("#story").html("");
+    pieces = {};
+    
+   $.each(pieceMakers, function(idx,pieceMaker){
+		pieces[pieceMaker.name] = new Piece(pieceMaker);	
+	});
+
+	//initialize divs
+	for (var name in pieces){
+		pieces[name].makeInitial();		
+	};
+    // Shallow copy
+    copyScriptMoves=[];
+    copyScriptMoves = scriptMoves.slice(0);
+
+}
+    
+function getSerial() {       
+    $("#copypad").val(JSON.stringify(play, null, 2));         
+}
+
+function setSerial() {
+
+    var incoming = $("#copypad").val();          
+    if(incoming.length > 0) {
+        if(confirm("Set this Json code for Staging?")) { 
+
+            writePlay(incoming);
+
+        }  
+    }            
+}
+
+function ConvertFormToJSON(formIdToProcess, add){
+    
+    var search = "form[name='" +  formIdToProcess + "']";
+//console.log(search);
+    var array = $(search).serializeArray();
+    var json = {};
+
+    $.each(array, function(idx, val) {
+        //if(val.name == "left" || val.name == "top" || val.name == "cam") {
+            
+            json[val.name] = val.value || '';
+        //}
+    });
+
+    if(formIdToProcess == "inputPiece") {
+        if(add) {
+            pieceMakers.push(json);
+        }
+        $("#pieceText").val(JSON.stringify(json, null, 2));
+    } else {
+        if(add) {
+            scriptMoves.push(json);
+        }
+        $("#scriptText").val(JSON.stringify(json, null, 2));
+    }
+    
+    //console.log('pieceMakers: ' + JSON.stringify(pieceMakers, ''));
+    //console.log('scriptMoves: ' + JSON.stringify(scriptMoves, ''));
+}
+    
+function checkScript(){
+    
+	currMSec = currMSec + scriptCheckInterval;
+//console.log("MSec:",currMSec, "Moves remaining:", copyScriptMoves.length);    
+	if(copyScriptMoves.length){
+		$.each(copyScriptMoves, function(idx, script){
+            
+			if(script){
+
+				if(script.start < currMSec){
+					//perform animation action
+//console.log("      run", script.name, "at", script.start, script.desc);           
+
+                   //make label
+                   var msg = "<div>"+(script.desc || '')+"</div>";
+                   $("#story").prepend(msg);    
+                    
+                    if(script.name.toLowerCase() == "all") {
+                        
+                        //run move for all
+                        $.each(pieces, function(idx, pc) {
+                            pc.move(script);
+                        });
+                    } else {
+				        //run move for piece
+                        pieces[script.name].move(script);
+                    
+	
+                    }
+                    //delete the script item					
+				    copyScriptMoves.splice(idx,1);
+				}
+			}
+		});
+	}else{
+		var msg = "<div>Fini</div>";
+		$("#desc").prepend(msg);
+		clearInterval(timer); 
+	}
+
+}
+    
+
+</script>
+
+<style>
+
+body {
+    padding: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.5;
+    font-size: 14px;
+}
+    
+ul {
+    list-style-type: none;
+}
+
+.tabs-menu {
+    height: 30px;
+    float: left;
+    clear: both;
+}
+
+.tabs-menu li {
+    height: 30px;
+    line-height: 30px;
+    float: left;
+    margin-right: 10px;
+    background-color: #ccc;
+    border-top: 1px solid #d4d4d1;
+    border-right: 1px solid #d4d4d1;
+    border-left: 1px solid #d4d4d1;
+}
+
+.tabs-menu li.current {
+    position: relative;
+    background-color: #fff;
+    border-bottom: 1px solid #fff;
+    z-index: 5;
+}
+
+.tabs-menu li a {
+    padding: 10px;
+    text-transform: uppercase;
+    color: #fff;
+    text-decoration: none; 
+}
+
+.tabs-menu .current a {
+    color: #2e7da3;
+}
+
+.tab {
+    xxborder: 1px solid #d4d4d1;
+    background-color: #fff;
+    float: left;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.tab-content {
+    padding: 20px;
+    display: none;
+}
+
+#tab-4 {
+ display: block;   
+}
+    
+.clear {
+    clear: both;
+}
+#story{
+    height: 22px;
+    width:100%;
+    padding:4px;
+    overflow-y:scroll;
+    border:solid thin blue;
+}
+#stage{
+    height: 500px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    border:solid thin brown;   
+}
+    
+#help {
+  
+}
+
+#helpText { 
+    width: 700px;
+    height: 200px;
+    overflow: auto;
+    background: #FFF;
+    color: black;
+    text-align: left;
+    font-family: Courier;
+    font-size: 11pt;   
+}
+
+textarea {    
+    width: 500px;
+    height: 150px;       
+}
+    
+</style>
+</head>
+
+<body>
+
+<div id="tabs-container">
+    <ul class="tabs-menu">
+        <li class="current"><a href="#tab-4">Raw Script</a></li>
+        <li><a href="#tab-3">Stage</a></li>
+        <li><a href="#tab-2">Add Moves</a></li>
+        <li><a href="#tab-1">Add Pieces</a></li>
+    </ul>
+    <div class="clear"></div>
+    <div class="tab">
+        <div id="tab-1" class="tab-content">
+            
+            <form action="" name="inputPiece" id="inputPiece">
+
+                <input id="xMeters" name="xMeters" type="number" step="any" placeholder="start x coord in meters"></input> <br/>
+                <input id="yMeters" name="yMeters" type="number" step="any" placeholder="start y coord in meters"></input> <br/> 
+                <input id="wMeters" name="wMeters" type="number" step="any" placeholder="width in meters"></input> <br/>
+                <input id="hMeters" name="hMeters" type="number" step="any" placeholder="height in meters"></input> <br/>
+                <input id="name" name="name" type="text" placeholder="name"></input> <br/>
+                <input id="img" name="img" type="text" placeholder="image"></input> <br/>
+    
+                <input id="showPiece" type="button" value="Show Piece"></input> <br/>
+                
+
+            </form>
+            <textarea id="pieceText" readonly="readonly"></textarea><br/>
+            <input id="addPiece" type="button" value="Add Piece"></input> 
+        </div>
+
+
+
+
+        <div id="tab-2" class="tab-content"><br/>
+        
+            
+            <form action="" name="inputScript" id="inputScript">
+<!--
+                "name":"test",
+"desc":"Move first block",
+"start":1000,
+"left":["+",3],
+"top":["-",2],
+"cam":["+",30]},
+                -->
+                <input  class="input" id="name" name="name" type="text" placeholder="name of piece"></input> <br/>
+            
+                <input  class="input" id="desc" name="desc" type="text"  placeholder="description text"></input> <br/>
+                
+                <input id="start" name="start" type="number" step="any" placeholder="start of move in msecs"></input> <br/> 
+
+                <input id="left" name="left" type="number" step="any" placeholder="meters to left (-) or right (+)"></input> <br/>
+
+                <input id="top" name="top" type="number" step="any" placeholder="meters forward (-) or back"></input> <br/>
+
+
+                <input id="cam" name="cam" type="number" step="any" placeholder="meters from piece to cam"></input> <br/>
+                
+    
+                <input id="showScript" type="button" value="Show Move"></input> <br/>
+
+                
+            </form>
+            <textarea id="scriptText" readonly="readonly"></textarea><br/>
+            <input id="addScript" type="button" value="Add Move"></input>
+        
+        </div>
+        <div id="tab-3" class="tab-content">
+            <div>
+                <input type="button" id="go" value="GO"></input> 
+                <input type="button" id="reset" value="RESET"></input> 
+            </div>
+            <div id="story"></div>
+            <div id="stage"></div>
+
+        </div>
+        <div id="tab-4" class="tab-content">
+            <div>TimeStage, by TimeTrails, Inc.</div>
+            <div id="headerButtons">
+                <button id="getJson">Get Json</button>
+                <button id="getHelp">Help ?</button>
+                <button id="setJson">Set Json</button>
+            </div>
+
+            <div id="help">
+                <textarea id="helpText">
+
+    TimeStage is a prototype animation engine, meant to reconstruct scenes from the past. An author will create "pieces" to be moved across a background by scripts that specify the timing and direction of the move, as well any text. The position of the cam can also be adjusted. 
+     Use the GetJson SetJson (must click Done) to try out movements. Make pieces and scripts using input form tabs, then copying into the json. You must save your own json files.
+
+                </textarea>
+                <br/>
+                <button id="doneHelp">Done</button>
+            </div>        
+            <div id="inOut">
+                <textarea id="copypad"></textarea>
+                <br/>
+                <button id="done">Done</button>   
+            </div>  
+        </div>
+    </div>
+</div>
+
+
+<body>
+</html>

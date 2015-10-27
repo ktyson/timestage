@@ -14,7 +14,7 @@ pieces["person"]={
 var script = [
 {"mSec":0,"dCamLeft":0,
 "pieces":[{"name":"person",
-"dLeft":["+",3],
+"dLeft":["+",1],
 "dTop":["+",0],
 "dCamDist":10,
 "dTime":5000,
