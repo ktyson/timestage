@@ -30,11 +30,13 @@ Piece.prototype = {
 				"left": this.curr.left +"px",
 				"width": this.curr.width +"px",
 				"height": this.curr.height +"px",
-				"background-color":"green",
+				"background-repeat": "no-repeat",
 				"z-index":100,
 				"position":"absolute",
 				"background-image":"url('images/" + this.curr.img + "')",
-				"background-size":"100%"
+				"background-size":"100%",
+				"border": "1px solid #efefef"
+
 			};		
 			$("#box_"+ name).css(myCss);
 	},
@@ -62,7 +64,7 @@ Piece.prototype = {
 			"width": myWidth + 'px'
 		};
 //console.log(myAnim);
-		$(myBox).animate(myAnim, 2000);
+		$(myBox).animate(myAnim, 3000);
 
 	
 	}
