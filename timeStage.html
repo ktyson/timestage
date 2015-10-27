@@ -28,37 +28,47 @@ var copyScriptMoves=[];
     
 pieceMakers = [
     {
-      "xMeters": 0,
+      "xMeters": -1,
       "yMeters": 2,
-      "wMeters": 0.73,
-      "hMeters": 2,
-      "name": "knight",
-      "img": "knight.gif"
+      "wMeters": 13,
+      "hMeters": 8,
+      "name": "castle",
+      "img": "castle1.png"
     },
     {
-      "xMeters": 3,
-      "yMeters": 6,
-      "wMeters": 6,
-      "hMeters": 3,
+      "xMeters": 4,
+      "yMeters": 3,
+      "wMeters": 8,
+      "hMeters": 4,
       "name": "trees",
       "img": "tree.gif"
+    },
+    {
+      "xMeters": -1,
+      "yMeters": 2.5,
+      "wMeters": 0.7,
+      "hMeters": 1.6,
+      "name": "knight",
+      "img": "knight.gif"
     }
   ];
-    
+
     
 scriptMoves=[
     {
       "name": "knight",
-      "desc": "I walk across bridge",
+      "desc": "I walk across the meadow",
       "start": 1000,
+      "duration": 3000,
       "left": -6,
       "top": 2,
       "cam": -20
     },
     {
       "name": "knight",
-      "desc": "I walk to front",
-      "start": 3000,
+      "desc": "I walk up to front",
+      "start": 4000,
+      "duration": 2000,
       "left": 2,
       "top": -0.5,
       "cam": -20
@@ -66,7 +76,8 @@ scriptMoves=[
     {
       "name": "all",
       "desc": "The camera moves back",
-      "start": 5000,
+      "start": 8000,
+      "duration": 1000,
       "left": 0,
       "top": 0,
       "cam": 10
@@ -170,7 +181,7 @@ function setBackground() {
     
     var wBkgrd = "870px";
     var hBkgrd = "500px";
-    var imgBkgrd = "images/bodian20castle20front.jpg";
+    var imgBkgrd = "images/background1.jpeg";
     $("#stage").css("background", "url(" + imgBkgrd + ") no-repeat");
     $("#stage").css("background-size", "100%");  
     $("#stage").css("width", wBkgrd);
@@ -445,6 +456,8 @@ textarea {
                 <input  class="input" id="desc" name="desc" type="text"  placeholder="description text"></input> <br/>
                 
                 <input id="start" name="start" type="number" step="any" placeholder="start of move in msecs"></input> <br/> 
+                
+                <input id="duration" name="duration" type="number" step="any" placeholder="duration of move in msecs"></input> <br/> 
 
                 <input id="left" name="left" type="number" step="any" placeholder="meters to left (-) or right (+)"></input> <br/>
 

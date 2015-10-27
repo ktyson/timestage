@@ -34,8 +34,7 @@ Piece.prototype = {
 				"z-index":100,
 				"position":"absolute",
 				"background-image":"url('images/" + this.curr.img + "')",
-				"background-size":"100%",
-				"border": "1px solid #efefef"
+				"background-size":"100%"
 
 			};		
 			$("#box_"+ name).css(myCss);
@@ -64,7 +63,7 @@ Piece.prototype = {
 			"width": myWidth + 'px'
 		};
 //console.log(myAnim);
-		$(myBox).animate(myAnim, 3000);
+		$(myBox).animate(myAnim, script.duration);
 
 	
 	}
